@@ -1,0 +1,82 @@
+/* ── Cameras Page ─────────────────────────────────── */
+
+/* Tab bar */
+.tab-bar {
+  display: flex; gap: 4px; padding: 6px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 7px 16px; border-radius: var(--radius-sm);
+  font-size: .85rem; font-weight: 500;
+  background: transparent; border: none;
+  color: var(--text-secondary); cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.tab-btn:hover { background: rgba(148,163,184,.1); color: var(--text-primary); }
+.tab-btn.active { background: var(--primary); color: #fff; }
+
+/* Cameras grid */
+.cameras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* Camera card */
+.camera-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 16px;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.camera-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+.camera-card.selected { border-color: var(--primary); background: rgba(79,70,229,.06); }
+
+.camera-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.camera-card-icon {
+  width: 38px; height: 38px; min-width: 38px;
+  background: rgba(79,70,229,.15); border-radius: 8px;
+  display: grid; place-items: center; color: var(--primary-light);
+}
+.camera-card-info { flex: 1; overflow: hidden; }
+.camera-card-name { display: block; font-weight: 600; font-size: .9rem; color: var(--text-primary); }
+.camera-card-loc  { display: block; }
+
+.camera-card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.camera-card-source {
+  padding: 4px 8px; background: var(--bg-base); border-radius: 4px;
+  margin-bottom: 10px; font-family: monospace; word-break: break-all;
+}
+.camera-card-actions { display: flex; gap: 6px; }
+
+/* Add camera form */
+.add-camera-form { margin-bottom: 24px; }
+.form-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+.form-hint { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+
+/* Source type selector */
+.source-type-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.source-type-btn {
+  padding: 6px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-secondary); font-size: .82rem; cursor: pointer;
+  transition: all var(--transition);
+}
+.source-type-btn:hover { border-color: var(--primary); color: var(--text-primary); }
+.source-type-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* Nearby search */
+.nearby-search { margin-bottom: 24px; }
+.nearby-results { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.nearby-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--bg-base); border: 1px solid var(--border);
+  cursor: pointer; transition: border-color var(--transition);
+}
+.nearby-item:hover { border-color: var(--primary); }
+.nearby-name { flex: 1; font-weight: 600; font-size: .88rem; color: var(--text-primary); }

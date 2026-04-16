@@ -1,0 +1,88 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.egg-info/
+*.egg
+
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.pytest_cache/
+coverage/
+htmlcov/
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer/packaging
+*.egg-info/
+.installed.cfg
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Environment variables
+.env
+.env.*
+
+# Model weights and large artifacts
+*.pt
+*.pth
+*.weights
+*.onnx
+*.h5
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/build/
+build/
+
+# NPM/Yarn lockfiles (optional - keep if you want them tracked)
+# package-lock.json
+# yarn.lock
+
+# Misc
+*.swp
+*.swo
+*~
+
+# Socket files
+*.sock
+
+# Ignore debug frames and other generated output
+debug_frames/
+
+# Ignore Python compiled caches in other dirs
+**/__pycache__/
+
+# End of file

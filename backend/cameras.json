@@ -1,0 +1,16 @@
+{
+  "camera_0": {
+    "id": "camera_0",
+    "name": "Main Parking Area",
+    "location": "Ground Floor - Lot A",
+    "latitude": 40.7128,
+    "longitude": -74.006,
+    "video_source": "parking_test_video.mp4",
+    "status": "active",
+    "total_slots": 70,
+    "username": null,
+    "password": null,
+    "camera_type": "file",
+    "favorite": false
+  }
+}

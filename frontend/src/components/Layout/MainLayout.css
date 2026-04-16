@@ -1,0 +1,41 @@
+/* ── Main Layout ─────────────────────────────────── */
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 230px;
+  min-height: 100vh;
+  overflow-y: auto;
+  transition: margin-left 220ms ease;
+}
+
+.main-layout.sidebar-collapsed .main-content {
+  margin-left: 60px;
+}
+
+/* page container */
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.page-header p {
+  font-size: 0.875rem; color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .main-content { margin-left: 0; }
+  .page-container { padding: 16px; }
+}

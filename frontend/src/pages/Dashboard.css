@@ -1,0 +1,93 @@
+/* ── Dashboard ────────────────────────────────────── */
+.dash-camera-bar { padding: 14px 18px; }
+.dash-camera-select {
+  flex: 1; max-width: 380px;
+  background: var(--bg-input); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 12px; font-size: .875rem;
+}
+
+/* ── Stats row ─────────────────────────────────────── */
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 16px 18px;
+  border-top: 3px solid transparent;
+  box-shadow: var(--shadow-sm);
+}
+.stat-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.stat-card-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 1rem;
+}
+.stat-card-label { font-size: .78rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--text-secondary); }
+.stat-card-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+.stat-card-sub   { font-size: .72rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ── Main layout ───────────────────────────────────── */
+.dash-main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 1100px) { .dash-main { grid-template-columns: 1fr; } }
+
+/* ── Video card ────────────────────────────────────── */
+.dash-video-card { position: relative; }
+.dash-video-wrap {
+  position: relative;
+  background: #000;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  aspect-ratio: 16/9;
+}
+.dash-video {
+  width: 100%; height: 100%; object-fit: contain;
+  display: block;
+}
+.dash-video-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.7);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--text-secondary); font-size: .9rem;
+}
+
+/* ── Right panel ───────────────────────────────────── */
+.dash-right { display: flex; flex-direction: column; gap: 14px; }
+
+.dash-ring-card { }
+
+/* ── Occupancy ring ─────────────────────────────────── */
+/* (inline SVG, no extra styles needed) */
+
+/* ── Slot mini grid ─────────────────────────────────── */
+.slot-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 5px;
+}
+.slot-mini {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 700; cursor: default;
+  transition: transform .15s;
+  color: #fff;
+}
+.slot-mini:hover { transform: scale(1.12); }
+.slot-mini-available { background: var(--slot-free); }
+.slot-mini-partial   { background: var(--slot-partial); }
+.slot-mini-occupied  { background: var(--slot-occupied); }
+.slot-mini-unknown   { background: var(--text-muted); }
+
+/* ── Empty state ────────────────────────────────────── */
+.dash-empty {
+  text-align: center; padding: 60px 30px;
+}
+.dash-empty-icon { font-size: 4rem; margin-bottom: 16px; }
+.dash-empty h2 { font-size: 1.4rem; margin-bottom: 8px; }
+
+/* ── Favorites ──────────────────────────────────────── */
+.dash-favorites { }

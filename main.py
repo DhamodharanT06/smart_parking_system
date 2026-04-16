@@ -15,7 +15,7 @@ parser.add_argument('--video', type=str, default=None, help='Alternate video fil
 args, _ = parser.parse_known_args()
 
 # --- VIDEO CONFIGURATION ---
-VIDEO_FILE = "cropped paring vid1 - Made with Clipchamp_1757611911863.mp4"  # Default video
+VIDEO_FILE = "parking_test_video.mp4"  # Default video
 DEFAULT_SLOT_FILE = 'slots.json'
 
 def choose_capture_mode():
@@ -193,20 +193,61 @@ else:
 # --- YOLO MODEL ---
 model = YOLO(args.model)
 
-# --- CAMERA STREAM (Video already configured at top) ---
-CONFIDENCE_THRESHOLD = args.conf  # Lower threshold for better detection (0.1-0.3 recommended)
+# ── Color palette (BGR) — one distinct color per YOLO class id ──────────────
+_COLORS = [
+    (56, 56, 255), (151, 157, 255), (31, 112, 255), (29, 178, 255),
+    (49, 210, 207), (10, 249, 72),  (23, 204, 146), (134, 219, 61),
+    (52, 147,  26), (187, 212,  0), (168, 153,  44), (255, 194,  0),
+    (147,  69,  52), (255, 113,  0), (0, 121, 255),  (255,  49, 197),
+]
+
+def draw_frame(frame, results):
+    """Draw YOLO vehicle detections on frame — matches debug_frame_root.jpg style."""
+    names   = results.names if hasattr(results, 'names') else {}
+    boxes   = results.boxes if results.boxes is not None else []
+    count   = 0
+    vehicles = []
+
+    for box in boxes:
+        cls_id = int(box.cls[0])
+        label  = names.get(cls_id, str(cls_id))
+        if label.lower() not in VEHICLE_CLASSES:
+            continue
+        count += 1
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+        conf  = float(box.conf[0])
+        color = _COLORS[cls_id % len(_COLORS)]
+        vehicles.append([x1, y1, x2, y2])
+
+        # Filled label background
+        txt = f"{label} {conf:.2f}"
+        (tw, th), _ = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+        cv2.rectangle(frame, (x1, y1 - th - 10), (x1 + tw + 4, y1), color, -1)
+        cv2.putText(frame, txt, (x1 + 2, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+        # Bounding box
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 3)
+
+    # Top-left count banner
+    banner = f"Vehicles Detected: {count}"
+    (bw, bh), _ = cv2.getTextSize(banner, cv2.FONT_HERSHEY_SIMPLEX, 0.75, 2)
+    cv2.rectangle(frame, (0, 0), (bw + 20, bh + 18), (0, 0, 0), -1)
+    cv2.putText(frame, banner, (10, bh + 8),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 230, 80), 2)
+
+    return frame, count, vehicles
+
+
+# --- CAMERA STREAM -----------------------------------------------------------
+CONFIDENCE_THRESHOLD = args.conf
 VEHICLE_CLASSES = {'car', 'truck', 'bus', 'motorcycle', 'bicycle'}
+YOLO_EVERY = 3   # run YOLO every N frames (keeps display smooth)
 
 if mode == 'video':
     vpath = video_to_open or args.video or VIDEO_FILE
     cap = cv2.VideoCapture(vpath)
     if not cap.isOpened():
         print(f"❌ Error: Could not open video: {vpath}")
-        print("Available videos:")
-        import os
-        for f in os.listdir('.'):
-            if f.endswith('.mp4'):
-                print(f"  • {f}")
         exit(1)
     print(f"🎥 Starting detection from video: {vpath}")
 else:
@@ -218,88 +259,48 @@ else:
 
 print(f"   Confidence threshold: {CONFIDENCE_THRESHOLD}")
 print(f"   Vehicle classes: {VEHICLE_CLASSES}")
-print("   Press 'q' to quit...")
+print("   Press 'q' to quit...\n")
+
+frame_idx    = 0
+last_results = None
 
 while True:
     ret, frame = cap.read()
     if not ret:
-        break
+        # Loop video back to start instead of stopping
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    results = model(frame, conf=CONFIDENCE_THRESHOLD, verbose=False)
-    vehicles = []
+    # Run YOLO every YOLO_EVERY frames; reuse cached results in between
+    if frame_idx % YOLO_EVERY == 0:
+        last_results = model(frame, conf=CONFIDENCE_THRESHOLD, verbose=False)[0]
 
-    for r in results[0].boxes:
-        cls = model.names[int(r.cls)]
-        
-        # Only include vehicle classes (improved filtering)
-        if cls.lower() in VEHICLE_CLASSES:
-            x1, y1, x2, y2 = map(int, r.xyxy[0])
-            conf = float(r.conf[0])
-            vehicles.append([x1, y1, x2, y2])
-            
-            # Draw vehicle detection box (blue)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-            cv2.putText(frame, f"{cls} {conf:.2f}", (x1, y1 - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+    annotated, count, vehicles = draw_frame(frame, last_results) if last_results else (frame, 0, [])
 
-    # --- SLOT CHECKING ---
-    slot_states = {}
-    for i, slot in enumerate(slots):
-        # Support both old format (x1, y1, x2, y2 keys) and new format (coords array)
-        if 'coords' in slot:
-            x1, y1, x2, y2 = slot['coords']
-            slot_id = slot.get('id', i + 1)
-        else:
-            x1, y1, x2, y2 = slot['x1'], slot['y1'], slot['x2'], slot['y2']
-            slot_id = i + 1
-            
-        max_iou = 0
-        for v in vehicles:
-            max_iou = max(max_iou, iou([x1, y1, x2, y2], v))
+    # Print stats every ~30 frames
+    if frame_idx % 30 == 0:
+        print(f"\r  Frame {frame_idx:5d}  |  Vehicles: {count}   ", end="", flush=True)
 
-        if max_iou > 0.6:
-            color, label, state = (0, 255, 0), 'Parked', 'parked'
-        elif max_iou > 0.2:
-            color, label, state = (0, 255, 255), 'Partial', 'partial'
-        else:
-            color, label, state = (0, 0, 255), 'Free', 'free'
-
-        slot_states[slot_id] = state
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-        cv2.putText(frame, f"Slot {slot_id}: {label}", (x1, y1 - 5),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-    # --- PRINT STATISTICS (every 10 frames) ---
-    frame_count = cv2.getTickCount()
-    if frame_count % 300 == 0:  # Print every ~10 frames
-        free_ids = [sid for sid, state in slot_states.items() if state == 'free']
-        parked_ids = [sid for sid, state in slot_states.items() if state == 'parked']
-        partial_ids = [sid for sid, state in slot_states.items() if state == 'partial']
-        
-        print(f"\n🟢 PARKED:  {len(parked_ids):3d} slots  IDs: {parked_ids}")
-        print(f"🟡 PARTIAL: {len(partial_ids):3d} slots  IDs: {partial_ids}")
-        print(f"🔴 FREE:    {len(free_ids):3d} slots  IDs: {free_ids}")
-        print(f"🚗 Vehicles detected: {len(vehicles)}")
-
-    # Debug mode: print detections and save a debug frame, then exit after N frames
+    # Debug mode — save frame and exit after N frames
     if args.debug:
-        # Print vehicles and save a debug image
-        print(f"[DEBUG] Vehicles detected: {len(vehicles)}")
-        for idx, v in enumerate(vehicles, start=1):
-            print(f"  {idx}: {v}")
-        cv2.imwrite('debug_frame.jpg', frame)
-        # Reduce frames for quick check
+        cv2.imwrite('debug_frame_root.jpg', annotated)
         if 'frame_iter' not in globals():
             frame_iter = 1
         else:
             frame_iter += 1
         if frame_iter >= args.frames:
-            print('Debug pass complete — saved debug_frame.jpg')
+            print(f'\nDebug pass complete — saved debug_frame_root.jpg ({count} vehicles)')
             break
 
-    cv2.imshow("Autonomous Parking System", frame)
+    cv2.imshow("Smart Parking System — Live Detection  |  Press Q to quit", annotated)
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        print("\n\n✅  Quit by user.")
         break
+
+    frame_idx += 1
 
 cap.release()
 cv2.destroyAllWindows()
+print("\nDone.\n")

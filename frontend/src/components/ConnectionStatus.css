@@ -1,0 +1,30 @@
+.connection-status-banner {
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.connection-status-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #991b1b;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.status-icon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.status-message {
+  margin: 0;
+}
