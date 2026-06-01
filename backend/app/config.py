@@ -4,8 +4,18 @@ from pathlib import Path
 # Base directory - project root (parent of backend folder)
 BASE_DIR = Path(__file__).parent.parent.parent
 
-# YOLO Model - resolve to project root
-MODEL_PATH = os.path.join(BASE_DIR, os.getenv("MODEL_PATH", "yolov8n.pt"))
+# YOLO Model - check if MODEL_PATH env var is absolute, else resolve relative to project root
+_model_env = os.getenv("MODEL_PATH", "yolov8n.pt")
+if os.path.isabs(_model_env):
+    MODEL_PATH = _model_env
+else:
+    # Try backend folder first, then project root
+    _backend_model = os.path.join(BASE_DIR, "backend", _model_env)
+    if os.path.exists(_backend_model):
+        MODEL_PATH = _backend_model
+    else:
+        MODEL_PATH = os.path.join(BASE_DIR, _model_env)
+
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", 0.2))
 
 # Slots configuration - resolve to project root
